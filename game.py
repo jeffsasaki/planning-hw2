@@ -13,6 +13,7 @@ class BoardState:
         """
         self.N_ROWS = 8
         self.N_COLS = 7
+
         self.state = np.array([1,2,3,4,5,3,50,51,52,53,54,52])
         self.decode_state = [self.decode_single_pos(d) for d in self.state]
 

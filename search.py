@@ -36,13 +36,28 @@ class Problem:
 class GameStateProblem(Problem):
     
     def __init__(self, initial_board_state, goal_board_state, player_idx):
+        """
+        player_idx is 0 or 1, depending on which player will be first to move from this initial state.
+
+        Inputs for this constructor:
+            - initial_board_state: an instance of BoardState
+            - goal_board_state: an instance of BoardState
+            - player_idx: an element from {0, 1}
+
+        How Problem.initial_state and Problem.goal_state_set are represented:
+            - initial_state: ((game board state tuple), player_idx ) <--- indicates state of board and who's turn it is to move
+              ---specifically it is of the form: tuple( ( tuple(initial_board_state.state), player_idx ) )
+
+            - goal_state_set: set([tuple((tuple(goal_board_state.state), 0)), tuple((tuple(goal_board_state.state), 1))])
+              ---in otherwords, the goal_state_set allows the goal_board_state.state to be reached on either player 0 or player 1's
+              turn.
+        """
         init_state = tuple((tuple(initial_board_state.state), int(player_idx)))
         goal_states = set([
             tuple((tuple(goal_board_state.state), 0)),
             tuple((tuple(goal_board_state.state), 1)),
         ])
         super().__init__(init_state, goal_states)
-
         self.sim = GameSimulator(None)
         self.search_alg_fnc = None
         self.set_search_alg()
@@ -70,28 +85,28 @@ class GameStateProblem(Problem):
         s_enc, p = state
         self.sim.game_state.state = np.array(s_enc, dtype=int)
         self.sim.game_state.decode_state = self.sim.game_state.make_state()
+
         return self.sim.generate_valid_actions(p)
 
-    def execute(self, state, action):
+    def execute(self, state: tuple, action: tuple):
         """
-        Transitions from the state to the next state that results from taking the action
+        From the given state, executes the given action
+
+        The action is given with respect to the current player
+
+        Inputs: 
+            state: is a tuple (encoded_state, player_idx), where encoded_state is a tuple of 12 integers,
+                and player_idx is the player that is moving this turn
+            action: (relative_idx, position), where relative_idx is an index into the encoded_state
+                with respect to the player_idx, and position is the encoded position where the indexed piece should move to.
+        Outputs:
+            the next state tuple that results from taking action in state
         """
         s, p = state
         k, v = action
         offset_idx = p * 6
-        target_i = offset_idx + k
-
-        new_items = []
-        for i in range(len(s)):
-            if i != target_i:
-                new_items.append(s[i])
-            else:
-                new_items.append(v)
-
-        next_state = (tuple(new_items), (p + 1) % 2)
-
-        return next_state
-    
+        return tuple((tuple( s[i] if i != offset_idx + k else v for i in range(len(s))), (p + 1) % 2))
+ 
     def bfs(self):
         start = self.initial_state
         if start in self.goal_state_set:
