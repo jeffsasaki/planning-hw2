@@ -145,7 +145,7 @@ class Rules:
         moves = set()
         for dc, dr in KNIGHT_STEPS:
             nc, nr = c + dc, r + dr
-            if Rules.in_bounds(nc, nr, ncols, nrows):
+            if Rules.bounded(nc, nr, ncols, nrows):
                 enc = board_state.encode_single_pos((nc, nr))
                 if enc not in occupied:
                     moves.add(enc)
@@ -177,7 +177,7 @@ class Rules:
         return True
 
     @staticmethod
-    def single_ball_actions(board_state: BoardState, player_idx: int):
+    def single_ball_actions(board_state, player_idx):
         """
         Returns the set of possible actions for moving the specified ball, assumed to be the
         valid ball for plater_idx  in the board_state
@@ -338,5 +338,5 @@ class GameSimulator:
         self.game_state.update(offset_idx + idx, pos)
 
     @staticmethod
-    def in_bounds(c, r, ncols, nrows):
+    def bounded(c, r, ncols, nrows):
         return 0 <= c < ncols and 0 <= r < nrows

@@ -58,9 +58,14 @@ class GameStateProblem(Problem):
         """
         self.search_alg_fnc = self.bfs
 
-    def get_actions(self, state):
+    def get_actions(self, state: tuple):
         """
-        Returns a set of valid actions that can be taken from this state
+        From the given state, provide the set possible actions that can be taken from the state
+        Inputs: 
+            state: (encoded_state, player_idx), where encoded_state is a tuple of 12 integers,
+                and player_idx is the player that is moving this turn
+        Outputs:
+            returns a set of actions
         """
         s_enc, p = state
         self.sim.game_state.state = np.array(s_enc, dtype=int)
@@ -80,12 +85,6 @@ class GameStateProblem(Problem):
         ))
         return next_state
     
-    def is_goal(self, state):
-        """
-        Checks if the state is a goal state in the set of goal states
-        """
-        return state in self.goal_state_set
-
     def bfs(self):
         start = self.initial_state
         if start in self.goal_state_set:
@@ -129,3 +128,9 @@ class GameStateProblem(Problem):
             result.append((states[i], act))
         result.append((states[-1], None))
         return result
+
+    def is_goal(self, state):
+        """
+        Checks if the state is a goal state in the set of goal states
+        """
+        return state in self.goal_state_set
