@@ -15,11 +15,26 @@ class Problem:
         self.initial_state = initial_state
         self.goal_state_set = goal_state_set
 
-class GameStateProblem(Problem):
-    """
-    Search over (encoded_state_tuple, player_idx) with unit-cost moves.
-    """
+    def get_actions(self, state):
+        """
+        Returns a set of valid actions that can be taken from this state
+        """
+        pass
 
+    def execute(self, state, action):
+        """
+        Transitions from the state to the next state that results from taking the action
+        """
+        pass
+
+    def is_goal(self, state):
+        """
+        Checks if the state is a goal state in the set of goal states
+        """
+        return state in self.goal_state_set
+
+class GameStateProblem(Problem):
+    
     def __init__(self, initial_board_state, goal_board_state, player_idx):
         init_state = tuple((tuple(initial_board_state.state), int(player_idx)))
         goal_states = set([

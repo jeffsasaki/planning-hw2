@@ -29,7 +29,7 @@ class BoardState:
         """
         return [self.decode_single_pos(d) for d in self.state]
 
-    def encode_single_pos(self, cr: tuple) -> int:
+    def encode_single_pos(self, cr: tuple):
         """
         Encodes a single coordinate (col, row) -> Z
 
@@ -111,16 +111,7 @@ class BoardState:
 
         return True
 
-    # def block_positions(self):
-    #     s = self.state.tolist()
-    #     white_blocks = set(s[0:5])
-    #     black_blocks = set(s[6:11])
-    #     return white_blocks, black_blocks
 class Rules:
-
-    @staticmethod
-    def _in_bounds(c, r, ncols, nrows):
-        return 0 <= c < ncols and 0 <= r < nrows
 
     @staticmethod
     def single_piece_actions(board_state: BoardState, piece_idx: int):
@@ -154,7 +145,7 @@ class Rules:
         moves = set()
         for dc, dr in KNIGHT_STEPS:
             nc, nr = c + dc, r + dr
-            if Rules._in_bounds(nc, nr, ncols, nrows):
+            if Rules.in_bounds(nc, nr, ncols, nrows):
                 enc = board_state.encode_single_pos((nc, nr))
                 if enc not in occupied:
                     moves.add(enc)
@@ -233,7 +224,7 @@ class Rules:
 
 class GameSimulator:
     """
-    Responsible for handling the game simulation / validation helpers used by search.
+    Responsible for handling the game simulation
     """
 
     def __init__(self, players):
@@ -345,3 +336,7 @@ class GameSimulator:
         offset_idx = player_idx * 6 ## Either 0 or 6
         idx, pos = action
         self.game_state.update(offset_idx + idx, pos)
+
+    @staticmethod
+    def in_bounds(c, r, ncols, nrows):
+        return 0 <= c < ncols and 0 <= r < nrows
