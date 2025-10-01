@@ -1,11 +1,16 @@
-import numpy as np
 from collections import deque
-from game import GameSimulator
+import numpy as np
+import queue
+from game import BoardState, GameSimulator, Rules
 
 class Problem:
     """
-    Minimal interface: carry an initial state and a goal set.
+    This is an interface which GameStateProblem implements.
+    You will be using GameStateProblem in your code. Please see
+    GameStateProblem for details on the format of the inputs and
+    outputs.
     """
+
     def __init__(self, initial_state, goal_state_set: set):
         self.initial_state = initial_state
         self.goal_state_set = goal_state_set
@@ -16,7 +21,6 @@ class GameStateProblem(Problem):
     """
 
     def __init__(self, initial_board_state, goal_board_state, player_idx):
-        # Represent states as ((tuple_of_12_ints), player_idx)
         init_state = tuple((tuple(initial_board_state.state), int(player_idx)))
         goal_states = set([
             tuple((tuple(goal_board_state.state), 0)),
@@ -28,25 +32,29 @@ class GameStateProblem(Problem):
         self.search_alg_fnc = None
         self.set_search_alg()
 
-    def set_search_alg(self, alg: str = ""):
-        # For this assignment we expose a single optimal algorithm: BFS.
+    def set_search_alg(self, alg=""):
+        """
+        If you decide to implement several search algorithms, and you wish to switch between them,
+        pass a string as a parameter to alg, and then set:
+            self.search_alg_fnc = self.your_method
+        to indicate which algorithm you'd like to run.
+
+        DONE: You need to set self.search_alg_fnc here
+        """
         self.search_alg_fnc = self.bfs
 
-    # -------- helpers used by search --------
-
-    def get_actions(self, state: tuple):
+    def get_actions(self, state):
         """
-        Return the set of legal actions from state (relative to the state's player).
+        Returns a set of valid actions that can be taken from this state
         """
         s_enc, p = state
-        # load simulator board to this state's board
         self.sim.game_state.state = np.array(s_enc, dtype=int)
         self.sim.game_state.decode_state = self.sim.game_state.make_state()
         return self.sim.generate_valid_actions(p)
 
-    def execute(self, state: tuple, action: tuple):
+    def execute(self, state, action):
         """
-        Transition function: apply action to state and return next state.
+        Transitions from the state to the next state that results from taking the action
         """
         s, p = state
         k, v = action
@@ -56,21 +64,20 @@ class GameStateProblem(Problem):
             (p + 1) % 2
         ))
         return next_state
-
-    # --------- BFS (optimal in steps) ---------
+    
+    def is_goal(self, state):
+        """
+        Checks if the state is a goal state in the set of goal states
+        """
+        return state in self.goal_state_set
 
     def bfs(self):
-        """
-        Breadth-first search over the turn-based state space.
-        Returns a list of (state, action) pairs from start to goal, with
-        the final pair having action=None.
-        """
         start = self.initial_state
         if start in self.goal_state_set:
             return [(start, None)]
 
         q = deque([start])
-        parent = {start: (None, None)}  # state -> (prev_state, action_taken_to_get_here)
+        parent = {start: (None, None)}
         visited = {start}
 
         while q:
@@ -85,7 +92,6 @@ class GameStateProblem(Problem):
                     parent[nxt] = (cur, act)
                     q.append(nxt)
 
-        # Find a reached goal
         goal = None
         for g in self.goal_state_set:
             if g in parent:
@@ -93,10 +99,8 @@ class GameStateProblem(Problem):
                 break
 
         if goal is None:
-            # No solution (shouldn't happen in provided tests)
             return [(start, None)]
 
-        # Reconstruct state sequence then attach actions-from-state
         states = []
         s = goal
         while s is not None:
@@ -106,7 +110,6 @@ class GameStateProblem(Problem):
 
         result = []
         for i in range(len(states) - 1):
-            # action stored on child leads from states[i] -> states[i+1]
             act = parent[states[i+1]][1]
             result.append((states[i], act))
         result.append((states[-1], None))
