@@ -1,6 +1,7 @@
 import numpy as np
 
 KNIGHT_STEPS = [(1,2),(2,1),(2,-1),(1,-2),(-1,-2),(-2,-1),(-2,1),(-1,2)]
+
 class BoardState:
     """
     Represents a state in the game
