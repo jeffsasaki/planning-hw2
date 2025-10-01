@@ -79,10 +79,17 @@ class GameStateProblem(Problem):
         s, p = state
         k, v = action
         offset_idx = p * 6
-        next_state = tuple((
-            tuple(s[i] if i != offset_idx + k else v for i in range(len(s))),
-            (p + 1) % 2
-        ))
+        target_i = offset_idx + k
+
+        new_items = []
+        for i in range(len(s)):
+            if i != target_i:
+                new_items.append(s[i])
+            else:
+                new_items.append(v)
+
+        next_state = (tuple(new_items), (p + 1) % 2)
+
         return next_state
     
     def bfs(self):

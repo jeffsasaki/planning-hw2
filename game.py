@@ -220,6 +220,10 @@ class Rules:
             c += step_c
             r += step_r
         return True
+    
+    @staticmethod
+    def bounded(c, r, ncols, nrows):
+        return 0 <= c < ncols and 0 <= r < nrows
 
 class GameSimulator:
     """
@@ -335,7 +339,3 @@ class GameSimulator:
         offset_idx = player_idx * 6 ## Either 0 or 6
         idx, pos = action
         self.game_state.update(offset_idx + idx, pos)
-
-    @staticmethod
-    def bounded(c, r, ncols, nrows):
-        return 0 <= c < ncols and 0 <= r < nrows
