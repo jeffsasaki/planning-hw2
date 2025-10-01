@@ -114,7 +114,7 @@ class BoardState:
 class Rules:
 
     @staticmethod
-    def single_piece_actions(board_state: BoardState, piece_idx: int):
+    def single_piece_actions(board_state, piece_idx):
         """
         Returns the set of possible actions for the given piece, assumed to be a valid piece located
         at piece_idx in the board_state.state.
@@ -152,31 +152,6 @@ class Rules:
         return moves
 
     @staticmethod
-    def clear_los(board_state: BoardState, src_enc: int, dst_enc: int, occupied: set) -> bool:
-        if src_enc == dst_enc:
-            return False
-        sc, sr = board_state.decode_single_pos(src_enc)
-        dc, dr = board_state.decode_single_pos(dst_enc)
-
-        dc_diff = dc - sc
-        dr_diff = dr - sr
-
-        if not (dc_diff == 0 or dr_diff == 0 or abs(dc_diff) == abs(dr_diff)):
-            return False
-
-        step_c = (0 if dc_diff == 0 else (1 if dc_diff > 0 else -1))
-        step_r = (0 if dr_diff == 0 else (1 if dr_diff > 0 else -1))
-
-        c, r = sc + step_c, sr + step_r
-        while (c, r) != (dc, dr):
-            enc = board_state.encode_single_pos((c, r))
-            if enc in occupied:
-                return False
-            c += step_c
-            r += step_r
-        return True
-
-    @staticmethod
     def single_ball_actions(board_state, player_idx):
         """
         Returns the set of possible actions for moving the specified ball, assumed to be the
@@ -203,7 +178,7 @@ class Rules:
                 if i == j: 
                     continue
                 a, b = my_blocks[i], my_blocks[j]
-                if Rules.clear_los(board_state, a, b, occupied):
+                if Rules.clear_line(board_state, a, b, occupied):
                     adj[a].add(b)
 
         reachable = set()
@@ -221,6 +196,30 @@ class Rules:
             reachable.remove(ball_pos)
         return reachable
 
+    @staticmethod
+    def clear_line(board_state: BoardState, src_enc: int, dst_enc: int, occupied: set) -> bool:
+        if src_enc == dst_enc:
+            return False
+        sc, sr = board_state.decode_single_pos(src_enc)
+        dc, dr = board_state.decode_single_pos(dst_enc)
+
+        dc_diff = dc - sc
+        dr_diff = dr - sr
+
+        if not (dc_diff == 0 or dr_diff == 0 or abs(dc_diff) == abs(dr_diff)):
+            return False
+
+        step_c = (0 if dc_diff == 0 else (1 if dc_diff > 0 else -1))
+        step_r = (0 if dr_diff == 0 else (1 if dr_diff > 0 else -1))
+
+        c, r = sc + step_c, sr + step_r
+        while (c, r) != (dc, dr):
+            enc = board_state.encode_single_pos((c, r))
+            if enc in occupied:
+                return False
+            c += step_c
+            r += step_r
+        return True
 
 class GameSimulator:
     """
