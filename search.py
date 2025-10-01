@@ -34,7 +34,7 @@ class Problem:
         return state in self.goal_state_set
 
 class GameStateProblem(Problem):
-    
+
     def __init__(self, initial_board_state, goal_board_state, player_idx):
         """
         player_idx is 0 or 1, depending on which player will be first to move from this initial state.
